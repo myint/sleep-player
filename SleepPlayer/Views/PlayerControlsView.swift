@@ -1,9 +1,7 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct PlayerControlsView: View {
     @EnvironmentObject var mediaPlayerState: MediaPlayerState
-    @State private var isShowingFilePicker = false
 
     var body: some View {
         VStack(spacing: 15) {
@@ -32,16 +30,6 @@ struct PlayerControlsView: View {
 
             // Control buttons
             HStack(spacing: 20) {
-                // Open File button
-                Button(action: {
-                    openFilePicker()
-                }) {
-                    Label("Open File", systemImage: "folder")
-                }
-                .keyboardShortcut("o", modifiers: .command)
-
-                Spacer()
-
                 // Play/Pause button
                 Button(action: {
                     if mediaPlayerState.playbackState == .playing {
@@ -55,15 +43,6 @@ struct PlayerControlsView: View {
                 }
                 .disabled(mediaPlayerState.currentFileURL == nil)
                 .keyboardShortcut(.space, modifiers: [])
-
-                // Stop button
-                Button(action: {
-                    mediaPlayerState.stop()
-                }) {
-                    Image(systemName: "stop.circle.fill")
-                        .font(.system(size: 44))
-                }
-                .disabled(mediaPlayerState.currentFileURL == nil)
 
                 Spacer()
 
@@ -84,28 +63,6 @@ struct PlayerControlsView: View {
             }
         }
         .padding(.horizontal)
-    }
-
-    private func openFilePicker() {
-        let panel = NSOpenPanel()
-        panel.allowsMultipleSelection = false
-        panel.canChooseDirectories = false
-        panel.canChooseFiles = true
-        panel.allowedContentTypes = [
-            .audiovisualContent,
-            .audio,
-            .movie,
-            .video,
-            .mpeg4Movie,
-            UTType(filenameExtension: "mp3")!,
-            UTType(filenameExtension: "m4a")!,
-            UTType(filenameExtension: "flac")!,
-            UTType(filenameExtension: "wav")!
-        ]
-
-        if panel.runModal() == .OK, let url = panel.url {
-            mediaPlayerState.loadMedia(url: url)
-        }
     }
 
     private func formatTime(_ seconds: TimeInterval) -> String {

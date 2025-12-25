@@ -41,9 +41,6 @@ struct ContentView: View {
                     .truncationMode(.middle)
             }
 
-            // Player Controls
-            PlayerControlsView()
-
             Divider()
 
             // Sleep Timer

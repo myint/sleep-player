@@ -27,6 +27,9 @@ class MediaPlayerState: ObservableObject {
     private var timeObserver: Any?
     private var cancellables = Set<AnyCancellable>()
 
+    // Reference to sleep timer for auto-start/pause/reset
+    weak var sleepTimerState: SleepTimerState?
+
     init() {
         mediaPlayerService = MediaPlayerService(state: self)
     }
@@ -35,16 +38,36 @@ class MediaPlayerState: ObservableObject {
         currentFileURL = url
         currentFileName = url.lastPathComponent
         mediaPlayerService?.loadMedia(url: url)
+
+        // Reset timer when loading new file
+        sleepTimerState?.resetTimer()
+
+        // Auto-play immediately after loading
+        play()
     }
 
     func play() {
         mediaPlayerService?.play()
         playbackState = .playing
+
+        // Auto-start or resume timer when playing
+        if let sleepTimerState = sleepTimerState {
+            if !sleepTimerState.isActive {
+                // Start timer with current duration
+                sleepTimerState.startTimer()
+            } else if sleepTimerState.isPaused {
+                // Resume timer if it was paused
+                sleepTimerState.resumeTimer()
+            }
+        }
     }
 
     func pause() {
         mediaPlayerService?.pause()
         playbackState = .paused
+
+        // Pause timer when pausing playback
+        sleepTimerState?.pauseTimer()
     }
 
     func stop() {

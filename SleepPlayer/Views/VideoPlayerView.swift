@@ -8,7 +8,6 @@ struct VideoPlayerView: View {
         if let player = mediaPlayerState.getPlayer() {
             VideoPlayer(player: player)
                 .aspectRatio(16/9, contentMode: .fit)
-                .disabled(true) // Disable default video player controls
         } else {
             Rectangle()
                 .fill(Color.black)

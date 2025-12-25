@@ -5,8 +5,8 @@ import Combine
 class MediaPlayerService {
     var player: AVPlayer?
     private weak var state: MediaPlayerState?
-    private var timeObserver: Any?
     private var playerItemObserver: NSKeyValueObservation?
+    private var rateObserver: NSKeyValueObservation?
 
     init(state: MediaPlayerState) {
         self.state = state
@@ -39,10 +39,33 @@ class MediaPlayerService {
             }
         }
 
-        // Add time observer
-        let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
-            self?.state?.currentTime = time.seconds
+        // Observe playback rate changes (for video player controls)
+        rateObserver = player?.observe(\.rate, options: [.new]) { [weak self] player, _ in
+            guard let self = self, let state = self.state else { return }
+
+            DispatchQueue.main.async {
+                if player.rate > 0 {
+                    // Playing
+                    if state.playbackState != .playing {
+                        state.playbackState = .playing
+                        // Auto-start or resume timer
+                        if let sleepTimerState = state.sleepTimerState {
+                            if !sleepTimerState.isActive {
+                                sleepTimerState.startTimer()
+                            } else if sleepTimerState.isPaused {
+                                sleepTimerState.resumeTimer()
+                            }
+                        }
+                    }
+                } else {
+                    // Paused
+                    if state.playbackState == .playing {
+                        state.playbackState = .paused
+                        // Pause timer
+                        state.sleepTimerState?.pauseTimer()
+                    }
+                }
+            }
         }
 
         // Set initial volume
@@ -91,12 +114,10 @@ class MediaPlayerService {
     }
 
     private func cleanup() {
-        if let observer = timeObserver {
-            player?.removeTimeObserver(observer)
-            timeObserver = nil
-        }
         playerItemObserver?.invalidate()
         playerItemObserver = nil
+        rateObserver?.invalidate()
+        rateObserver = nil
         player = nil
     }
 

@@ -4,12 +4,9 @@ struct SleepTimerView: View {
     @EnvironmentObject var sleepTimerState: SleepTimerState
     @EnvironmentObject var mediaPlayerState: MediaPlayerState
 
-    let presetDurations: [(String, TimeInterval)] = [
-        ("15 min", 15 * 60),
-        ("30 min", 30 * 60),
-        ("45 min", 45 * 60),
-        ("60 min", 60 * 60)
-    ]
+    @State private var durationMinutes: Int = 30
+    @State private var displayTime: String = "--:--"
+    @State private var updateTimer: Timer?
 
     var body: some View {
         VStack(spacing: 15) {
@@ -17,59 +14,73 @@ struct SleepTimerView: View {
                 .font(.headline)
 
             // Timer display
-            if sleepTimerState.isActive {
-                Text(sleepTimerState.remainingTimeFormatted)
-                    .font(.system(size: 48, weight: .bold, design: .monospaced))
-                    .foregroundColor(.primary)
-            } else {
-                Text("--:--")
-                    .font(.system(size: 48, weight: .bold, design: .monospaced))
-                    .foregroundColor(.secondary)
-            }
-
-            // Preset buttons
-            HStack(spacing: 12) {
-                ForEach(presetDurations, id: \.0) { preset in
-                    Button(preset.0) {
-                        if !sleepTimerState.isActive {
-                            startTimerWithMediaPlayer(duration: preset.1)
-                        }
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(sleepTimerState.isActive)
+            Text(displayTime)
+                .font(.system(size: 48, weight: .bold, design: .monospaced))
+                .foregroundColor(sleepTimerState.isPaused ? .secondary : .primary)
+                .onAppear {
+                    startDisplayUpdate()
                 }
-            }
-
-            // Control buttons
-            HStack(spacing: 20) {
-                if sleepTimerState.isActive {
-                    Button("Cancel Timer") {
-                        sleepTimerState.cancelTimer()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.red)
-                } else {
-                    Button("Start Timer (30 min)") {
-                        startTimerWithMediaPlayer(duration: nil)
-                    }
-                    .buttonStyle(.borderedProminent)
+                .onDisappear {
+                    updateTimer?.invalidate()
                 }
+
+            // Duration spinner and reset button
+            HStack(spacing: 10) {
+                Text("Duration (minutes):")
+                    .font(.subheadline)
+
+                Stepper(value: $durationMinutes, in: 1...120, step: 5) {
+                    Text("\(durationMinutes)")
+                        .font(.body)
+                        .frame(width: 50)
+                        .monospacedDigit()
+                }
+                .onChange(of: durationMinutes) { newValue in
+                    sleepTimerState.timerDuration = TimeInterval(newValue * 60)
+                    // Reset remaining time to new duration
+                    if sleepTimerState.isActive || sleepTimerState.isPaused {
+                        sleepTimerState.remainingTime = TimeInterval(newValue * 60)
+                    }
+                }
+
+                Spacer()
+
+                // Reset button
+                Button(action: {
+                    sleepTimerState.resetTimer()
+                }) {
+                    Image(systemName: "arrow.counterclockwise")
+                        .font(.system(size: 16))
+                }
+                .buttonStyle(.bordered)
+                .help("Reset timer to duration")
             }
-            .padding(.top, 8)
         }
         .padding()
         .background(Color.secondary.opacity(0.1))
         .cornerRadius(12)
         .padding(.horizontal)
+        .onAppear {
+            // Initialize duration from current timer duration
+            durationMinutes = Int(sleepTimerState.timerDuration / 60)
+        }
     }
 
-    private func startTimerWithMediaPlayer(duration: TimeInterval?) {
-        // Connect the sleep timer service to the media player state
-        if let sleepTimerService = sleepTimerState.sleepTimerService {
-            sleepTimerService.setMediaPlayerState(mediaPlayerState)
-        }
+    private func startDisplayUpdate() {
+        updateTimer?.invalidate()
+        updateDisplayTime()
 
-        sleepTimerState.startTimer(duration: duration)
+        updateTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+            updateDisplayTime()
+        }
+    }
+
+    private func updateDisplayTime() {
+        if sleepTimerState.isActive || sleepTimerState.isPaused {
+            displayTime = sleepTimerState.remainingTimeFormatted
+        } else {
+            displayTime = "--:--"
+        }
     }
 }
 

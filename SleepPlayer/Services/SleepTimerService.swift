@@ -20,15 +20,29 @@ class SleepTimerService {
 
         guard let state = state else { return }
 
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        let newTimer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self, let state = self.state else { return }
 
-            if state.remainingTime > 0 {
-                state.remainingTime -= 1
-            } else {
-                self.timerExpired()
+            // Update state asynchronously to avoid interfering with menu tracking
+            DispatchQueue.main.async {
+                if !state.isPaused && state.remainingTime > 0 {
+                    state.remainingTime -= 1
+                } else if !state.isPaused && state.remainingTime <= 0 {
+                    self.timerExpired()
+                }
             }
         }
+        RunLoop.main.add(newTimer, forMode: .common)
+        timer = newTimer
+    }
+
+    func pause() {
+        // Keep timer running but stop decrementing in the timer callback
+        // State's isPaused property will be checked in the timer callback
+    }
+
+    func resume() {
+        // Resume decrementing - state's isPaused will be set to false
     }
 
     func cancel() {
@@ -53,7 +67,7 @@ class SleepTimerService {
         let volumeStep = mediaPlayerState.volume / Float(fadeSteps)
         var currentStep = 0
 
-        fadeTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
+        let newFadeTimer = Timer(timeInterval: 0.1, repeats: true) { [weak self] timer in
             guard let self = self, let mediaPlayerState = self.mediaPlayerState else {
                 timer.invalidate()
                 return
@@ -78,6 +92,8 @@ class SleepTimerService {
                 mediaPlayerState.setVolume(newVolume)
             }
         }
+        RunLoop.main.add(newFadeTimer, forMode: .common)
+        fadeTimer = newFadeTimer
     }
 
     deinit {
