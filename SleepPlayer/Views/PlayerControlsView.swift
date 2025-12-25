@@ -41,6 +41,7 @@ struct PlayerControlsView: View {
                     Image(systemName: mediaPlayerState.playbackState == .playing ? "pause.circle.fill" : "play.circle.fill")
                         .font(.system(size: 44))
                 }
+                .buttonStyle(.plain)
                 .disabled(mediaPlayerState.currentFileURL == nil)
                 .keyboardShortcut(.space, modifiers: [])
 
@@ -61,6 +62,7 @@ struct PlayerControlsView: View {
                     .frame(width: 100)
                 }
             }
+            .padding(.vertical, 5)
         }
     }
 
