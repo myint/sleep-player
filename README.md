@@ -85,17 +85,42 @@ SleepPlayer/
 
 ## Technical Details
 
-- Built with **Swift** and **SwiftUI**
-- Uses **AVFoundation** for media playback
-- **MediaPlayer** framework for AirPod integration
-- Sleep timer uses volume interpolation for smooth 8-second fade-out
-- Video conditionally displayed only for video files
+### Architecture
+- **Language**: Swift 5.9+
+- **UI Framework**: SwiftUI (declarative UI)
+- **Media Playback**: AVFoundation (AVPlayer for unified audio/video)
+- **Remote Control**: MediaPlayer framework (MPRemoteCommandCenter)
+- **Deployment Target**: macOS 12.0 (Monterey)
+
+### Key Components
+- **MediaPlayerService**: Manages AVPlayer, handles audio/video detection
+- **SleepTimerService**: Countdown timer with 80-step volume fade (0.1s intervals)
+- **MediaKeyHandler**: Registers remote command handlers for AirPods
+- **State Management**: Observable objects with @Published properties
+
+### Supported Formats
+- **Audio**: MP3, AAC, M4A, FLAC, WAV, AIFF, ALAC, and all AVFoundation-supported audio
+- **Video**: MP4, MOV, M4V, and all AVFoundation-supported video codecs
 
 ## Known Limitations
 
 - Single file playback only (no playlists)
 - No persistence between launches (fresh start each time)
 - Requires macOS 12.0 or later
+- Video player controls are custom (SwiftUI VideoPlayer used but controls disabled)
+
+## Future Enhancements
+
+Potential features for future development:
+- [ ] Playlist support with queue management
+- [ ] Persist last file, timer duration, and playback position
+- [ ] Custom timer duration input (not just presets)
+- [ ] Keyboard shortcuts for timer control
+- [ ] Album art display for audio files
+- [ ] Visualizer for audio playback
+- [ ] Export timer history/usage statistics
+- [ ] Mini player mode
+- [ ] AppleScript support for automation
 
 ## Troubleshooting
 
