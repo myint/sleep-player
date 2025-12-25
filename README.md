@@ -18,44 +18,34 @@ A native macOS media player with sleep timer functionality, supporting both audi
 
 ## Setup Instructions
 
-### Option 1: Create Xcode Project (Recommended)
+### Quick Start (Recommended)
 
-1. Open Xcode
-2. Select "File" → "New" → "Project"
-3. Choose "macOS" → "App"
-4. Configure the project:
-   - Product Name: **SleepPlayer**
-   - Interface: **SwiftUI**
-   - Language: **Swift**
-   - Save to: The `sleep-player` directory
+The Xcode project is already set up and ready to use!
 
-5. Delete the default files created by Xcode (ContentView.swift, SleepPlayerApp.swift, etc.)
+1. Open the project:
+   ```bash
+   open SleepPlayer.xcodeproj
+   ```
 
-6. Add the source files to your project:
-   - Right-click on the "SleepPlayer" group in Xcode
-   - Select "Add Files to SleepPlayer..."
-   - Navigate to `SleepPlayer/SleepPlayer/` and add all folders:
-     - App/
-     - Models/
-     - Services/
-     - Views/
-     - Assets.xcassets/
-   - Make sure "Copy items if needed" is **unchecked**
-   - Make sure target is checked
+2. In Xcode, select the "SleepPlayer" scheme at the top
 
-7. Set deployment target:
-   - Select the project in the navigator
-   - Under "Deployment Info", set "Minimum Deployments" to **macOS 12.0**
+3. Build and run (⌘R)
 
-8. Build and run (⌘R)
+That's it! The app should launch with a clean window ready to load media files.
 
-### Option 2: Import Existing Files
+### Building from Command Line
 
-If you have an existing Xcode project:
+You can also build from the command line:
 
-1. Drag the folders from `SleepPlayer/SleepPlayer/` into your Xcode project
-2. Ensure all files are added to your target
-3. Set minimum deployment target to macOS 12.0
+```bash
+xcodebuild -project SleepPlayer.xcodeproj -scheme SleepPlayer -configuration Debug build
+```
+
+To run the built app:
+
+```bash
+open ~/Library/Developer/Xcode/DerivedData/SleepPlayer-*/Build/Products/Debug/SleepPlayer.app
+```
 
 ## Project Structure
 
