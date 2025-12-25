@@ -18,7 +18,7 @@ class SleepTimerService {
     func start(duration: TimeInterval) {
         cancel() // Cancel any existing timer
 
-        guard let state = state else { return }
+        guard state != nil else { return }
 
         let newTimer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self, let state = self.state else { return }
@@ -27,6 +27,11 @@ class SleepTimerService {
             DispatchQueue.main.async {
                 if !state.isPaused && state.remainingTime > 0 {
                     state.remainingTime -= 1
+
+                    // Start fade when remaining time reaches fade duration
+                    if !state.isFading && state.remainingTime <= state.fadeDuration {
+                        self.startFadeOut()
+                    }
                 } else if !state.isPaused && state.remainingTime <= 0 {
                     self.timerExpired()
                 }
@@ -50,21 +55,46 @@ class SleepTimerService {
         timer = nil
         fadeTimer?.invalidate()
         fadeTimer = nil
+        state?.isFading = false
+
+        // Restore volume if it was reduced by fading
+        if let mediaPlayerState = mediaPlayerState, mediaPlayerState.volume < 1.0 {
+            mediaPlayerState.setVolume(1.0)
+        }
     }
 
-    private func timerExpired() {
-        cancel()
-
-        // Start fade-out
+    func triggerEndOfFileFade() {
+        // Called when file is near end - start fade-out
         startFadeOut()
     }
 
-    private func startFadeOut() {
-        guard let mediaPlayerState = mediaPlayerState else { return }
+    private func timerExpired() {
+        // Only invalidate the countdown timer, NOT the fade timer
+        // The fade timer should be allowed to complete
+        timer?.invalidate()
+        timer = nil
 
-        let fadeDuration: TimeInterval = 8.0 // 8 seconds
-        let fadeSteps = 80 // 0.1s intervals
-        let volumeStep = mediaPlayerState.volume / Float(fadeSteps)
+        // If fade hasn't started yet (shouldn't happen), start it now
+        if let state = state, !state.isFading {
+            startFadeOut()
+        }
+    }
+
+    private func startFadeOut() {
+        guard let mediaPlayerState = mediaPlayerState, let state = state else { return }
+
+        // Don't start a new fade if one is already running
+        if fadeTimer != nil {
+            return
+        }
+
+        // Mark that we're fading - only do this AFTER the guards pass
+        state.isFading = true
+
+        let fadeDuration = state.fadeDuration
+        let fadeSteps = Int(fadeDuration * 10) // 0.1s intervals
+        let initialVolume = mediaPlayerState.volume
+        let volumeStep = initialVolume / Float(fadeSteps)
         var currentStep = 0
 
         let newFadeTimer = Timer(timeInterval: 0.1, repeats: true) { [weak self] timer in
@@ -81,6 +111,12 @@ class SleepTimerService {
                 mediaPlayerState.pause()
                 timer.invalidate()
                 self.fadeTimer = nil
+
+                // Clean up state
+                if let state = self.state {
+                    state.isFading = false
+                    state.isActive = false
+                }
 
                 // Reset volume for next playback
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

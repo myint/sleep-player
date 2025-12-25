@@ -7,6 +7,8 @@ class MediaPlayerService {
     private weak var state: MediaPlayerState?
     private var playerItemObserver: NSKeyValueObservation?
     private var rateObserver: NSKeyValueObservation?
+    private var timeObserver: Any?
+    private var hasTriggeredEndFade = false
 
     init(state: MediaPlayerState) {
         self.state = state
@@ -23,6 +25,8 @@ class MediaPlayerService {
     func loadMedia(url: URL) {
         // Clean up existing player
         cleanup()
+
+        hasTriggeredEndFade = false
 
         let asset = AVAsset(url: url)
         let playerItem = AVPlayerItem(asset: asset)
@@ -64,6 +68,29 @@ class MediaPlayerService {
                         // Pause timer
                         state.sleepTimerState?.pauseTimer()
                     }
+                }
+            }
+        }
+
+        // Add periodic time observer to update current time and check for end fade
+        let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
+            guard let self = self, let state = self.state else { return }
+
+            let currentTime = time.seconds
+            state.currentTime = currentTime
+
+            // Check if we should start fade-out near end of file
+            if let sleepTimerState = state.sleepTimerState, !self.hasTriggeredEndFade {
+                let duration = state.duration
+                let fadeDuration = sleepTimerState.fadeDuration
+                let timeRemaining = duration - currentTime
+
+                // Start fade if we're within fade duration of the end
+                // Only do this if duration is valid and we're actually playing
+                if duration > 0 && timeRemaining > 0 && timeRemaining <= fadeDuration && !sleepTimerState.isFading {
+                    self.hasTriggeredEndFade = true
+                    sleepTimerState.sleepTimerService?.triggerEndOfFileFade()
                 }
             }
         }
@@ -118,7 +145,12 @@ class MediaPlayerService {
         playerItemObserver = nil
         rateObserver?.invalidate()
         rateObserver = nil
+        if let timeObserver = timeObserver {
+            player?.removeTimeObserver(timeObserver)
+            self.timeObserver = nil
+        }
         player = nil
+        hasTriggeredEndFade = false
     }
 
     deinit {

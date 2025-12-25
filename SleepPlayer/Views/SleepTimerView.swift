@@ -5,6 +5,7 @@ struct SleepTimerView: View {
     @EnvironmentObject var mediaPlayerState: MediaPlayerState
 
     @State private var durationMinutes: Int = 30
+    @State private var fadeSeconds: Int = 60
     @State private var displayTime: String = "--:--"
     @State private var updateTimer: Timer?
 
@@ -55,6 +56,24 @@ struct SleepTimerView: View {
                 .buttonStyle(.bordered)
                 .help("Reset timer to duration")
             }
+
+            // Fade duration spinner
+            HStack(spacing: 10) {
+                Text("Fade duration (seconds):")
+                    .font(.subheadline)
+
+                Stepper(value: $fadeSeconds, in: 5...120, step: 5) {
+                    Text("\(fadeSeconds)")
+                        .font(.body)
+                        .frame(width: 50)
+                        .monospacedDigit()
+                }
+                .onChange(of: fadeSeconds) { newValue in
+                    sleepTimerState.fadeDuration = TimeInterval(newValue)
+                }
+
+                Spacer()
+            }
         }
         .padding()
         .background(Color.secondary.opacity(0.1))
@@ -63,6 +82,7 @@ struct SleepTimerView: View {
         .onAppear {
             // Initialize duration from current timer duration
             durationMinutes = Int(sleepTimerState.timerDuration / 60)
+            fadeSeconds = Int(sleepTimerState.fadeDuration)
         }
     }
 

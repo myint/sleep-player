@@ -3,9 +3,11 @@ import Combine
 
 class SleepTimerState: ObservableObject {
     @Published var timerDuration: TimeInterval = 30 * 60 // Default 30 minutes
+    @Published var fadeDuration: TimeInterval = 60 // Default 60 seconds fade
     var remainingTime: TimeInterval = 0  // Not published to avoid menu issues
     @Published var isActive: Bool = false
     @Published var isPaused: Bool = false
+    @Published var isFading: Bool = false
 
     var sleepTimerService: SleepTimerService?
 
@@ -20,6 +22,7 @@ class SleepTimerState: ObservableObject {
         remainingTime = timerDuration
         isActive = true
         isPaused = false
+        isFading = false
         sleepTimerService?.start(duration: timerDuration)
     }
 
@@ -36,6 +39,7 @@ class SleepTimerState: ObservableObject {
     func cancelTimer() {
         isActive = false
         isPaused = false
+        isFading = false
         remainingTime = 0
         sleepTimerService?.cancel()
     }
@@ -46,6 +50,7 @@ class SleepTimerState: ObservableObject {
         let wasPaused = isPaused
 
         remainingTime = timerDuration
+        isFading = false
 
         if wasActive {
             // Restart the timer with the new remaining time
