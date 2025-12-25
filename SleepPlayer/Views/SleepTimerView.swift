@@ -5,7 +5,7 @@ struct SleepTimerView: View {
     @EnvironmentObject var mediaPlayerState: MediaPlayerState
 
     @State private var durationMinutes: Int = 30
-    @State private var fadeSeconds: Int = 60
+    @State private var fadeSeconds: Int = 120
     @State private var displayTime: String = "--:--"
     @State private var updateTimer: Timer?
 

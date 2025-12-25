@@ -81,14 +81,20 @@ class MediaPlayerService {
             state.currentTime = currentTime
 
             // Check if we should start fade-out near end of file
-            if let sleepTimerState = state.sleepTimerState, !self.hasTriggeredEndFade {
+            if let sleepTimerState = state.sleepTimerState {
                 let duration = state.duration
                 let fadeDuration = sleepTimerState.fadeDuration
                 let timeRemaining = duration - currentTime
 
+                // Reset the fade trigger if we're outside the fade zone
+                // This allows seeking to re-trigger the end-of-file fade
+                if timeRemaining > fadeDuration {
+                    self.hasTriggeredEndFade = false
+                }
+
                 // Start fade if we're within fade duration of the end
                 // Only do this if duration is valid and we're actually playing
-                if duration > 0 && timeRemaining > 0 && timeRemaining <= fadeDuration && !sleepTimerState.isFading {
+                if !self.hasTriggeredEndFade && duration > 0 && timeRemaining > 0 && timeRemaining <= fadeDuration && !sleepTimerState.isFading {
                     self.hasTriggeredEndFade = true
                     sleepTimerState.sleepTimerService?.triggerEndOfFileFade()
                 }

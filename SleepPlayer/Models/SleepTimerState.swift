@@ -3,7 +3,7 @@ import Combine
 
 class SleepTimerState: ObservableObject {
     @Published var timerDuration: TimeInterval = 30 * 60 // Default 30 minutes
-    @Published var fadeDuration: TimeInterval = 60 // Default 60 seconds fade
+    @Published var fadeDuration: TimeInterval = 120 // Default 120 seconds fade
     var remainingTime: TimeInterval = 0  // Not published to avoid menu issues
     @Published var isActive: Bool = false
     @Published var isPaused: Bool = false
