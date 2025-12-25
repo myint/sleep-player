@@ -6,6 +6,7 @@ struct SleepTimerView: View {
 
     @State private var durationMinutes: Int = 30
     @State private var fadeSeconds: Int = 120
+    @State private var chopEndSeconds: Int = 120
     @State private var displayTime: String = "--:--"
     @State private var updateTimer: Timer?
 
@@ -74,15 +75,33 @@ struct SleepTimerView: View {
 
                 Spacer()
             }
+
+            // Chop end duration spinner
+            HStack(spacing: 10) {
+                Text("Stop before end (seconds):")
+                    .font(.subheadline)
+
+                Stepper(value: $chopEndSeconds, in: 0...300, step: 10) {
+                    Text("\(chopEndSeconds)")
+                        .font(.body)
+                        .frame(width: 50)
+                        .monospacedDigit()
+                }
+                .onChange(of: chopEndSeconds) { newValue in
+                    sleepTimerState.chopEndDuration = TimeInterval(newValue)
+                }
+
+                Spacer()
+            }
         }
         .padding()
         .background(Color.secondary.opacity(0.1))
         .cornerRadius(12)
-        .padding(.horizontal)
         .onAppear {
             // Initialize duration from current timer duration
             durationMinutes = Int(sleepTimerState.timerDuration / 60)
             fadeSeconds = Int(sleepTimerState.fadeDuration)
+            chopEndSeconds = Int(sleepTimerState.chopEndDuration)
         }
     }
 

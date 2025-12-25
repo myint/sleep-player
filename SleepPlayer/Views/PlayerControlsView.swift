@@ -62,7 +62,6 @@ struct PlayerControlsView: View {
                 }
             }
         }
-        .padding(.horizontal)
     }
 
     private func formatTime(_ seconds: TimeInterval) -> String {

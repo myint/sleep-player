@@ -12,7 +12,7 @@ struct SleepPlayerApp: App {
             ContentView()
                 .environmentObject(mediaPlayerState)
                 .environmentObject(sleepTimerState)
-                .frame(minWidth: 600, minHeight: 500)
+                .frame(minWidth: 650, minHeight: 800)
                 .onAppear {
                     // Wire up the media key handler and sleep timer service
                     mediaKeyHandler.setMediaPlayerState(mediaPlayerState)

@@ -5,51 +5,58 @@ struct ContentView: View {
     @EnvironmentObject var sleepTimerState: SleepTimerState
 
     var body: some View {
-        VStack(spacing: 20) {
-            // Header
-            Text("Sleep Timer Media Player")
-                .font(.title)
-                .fontWeight(.bold)
-                .padding(.top)
+        ScrollView {
+            VStack(spacing: 15) {
+                // Header
+                Text("Sleep Timer Media Player")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .padding(.top, 10)
 
-            // Video Player View (conditional)
-            if mediaPlayerState.mediaType == .video {
-                VideoPlayerView()
-                    .frame(height: 300)
+                // Video Player View (conditional)
+                if mediaPlayerState.mediaType == .video {
+                    VideoPlayerView()
+                        .frame(height: 300)
+                        .cornerRadius(8)
+                } else if mediaPlayerState.currentFileURL != nil {
+                    // Audio placeholder
+                    VStack {
+                        Image(systemName: "music.note")
+                            .font(.system(size: 60))
+                            .foregroundColor(.secondary)
+                        Text("Audio Playing")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(height: 200)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.secondary.opacity(0.1))
                     .cornerRadius(8)
-            } else if mediaPlayerState.currentFileURL != nil {
-                // Audio placeholder
-                VStack {
-                    Image(systemName: "music.note")
-                        .font(.system(size: 60))
-                        .foregroundColor(.secondary)
-                    Text("Audio Playing")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
                 }
-                .frame(height: 200)
-                .frame(maxWidth: .infinity)
-                .background(Color.secondary.opacity(0.1))
-                .cornerRadius(8)
+
+                // File name display
+                if !mediaPlayerState.currentFileName.isEmpty {
+                    Text(mediaPlayerState.currentFileName)
+                        .font(.headline)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .padding(.horizontal)
+                }
+
+                // Player Controls
+                PlayerControlsView()
+                    .padding(.horizontal)
+
+                Divider()
+                    .padding(.vertical, 5)
+
+                // Sleep Timer
+                SleepTimerView()
+
+                Spacer(minLength: 20)
             }
-
-            // File name display
-            if !mediaPlayerState.currentFileName.isEmpty {
-                Text(mediaPlayerState.currentFileName)
-                    .font(.headline)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-            }
-
-            Divider()
-
-            // Sleep Timer
-            SleepTimerView()
-
-            Spacer()
+            .padding()
         }
-        .padding()
-        .frame(minWidth: 600, minHeight: 500)
     }
 }
 
