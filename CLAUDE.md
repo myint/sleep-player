@@ -246,7 +246,7 @@ make install
 - **Output path**: `build/DerivedData/Build/Products/Release/SleepPlayer.app`
 - **DMG output**: `SleepPlayer.dmg` (in project root)
 - **Default configuration**: Release
-- **Default version**: 1.0.0
+- **Default version**: 1.1.0
 
 **DMG Creation**:
 - The `make dmg` target creates a compressed disk image (UDZO format)
@@ -418,10 +418,14 @@ if condition {
 ---
 
 **Last Updated**: 2025-12-26
-**Project Version**: 1.0.1 (AirPods media control fix)
+**Project Version**: 1.1.0
 **Build Status**: ✅ Builds successfully with Xcode 13.4+
 
 ## Recent Updates
+
+### 2025-12-26 - Version 1.1.0
+- Quit app when window closes (QuickTime Player behavior)
+- App now stops playback, cancels timer, and terminates when window is closed
 
 ### 2025-12-26 - AirPods Media Control Fix
 - Fixed AirPods button integration by implementing proper Now Playing Info updates
