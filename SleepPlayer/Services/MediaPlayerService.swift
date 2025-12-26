@@ -9,6 +9,7 @@ class MediaPlayerService {
     private var rateObserver: NSKeyValueObservation?
     private var timeObserver: Any?
     private var hasTriggeredEndFade = false
+    private var timeUpdateCounter = 0
 
     init(state: MediaPlayerState) {
         self.state = state
@@ -60,7 +61,8 @@ class MediaPlayerService {
         rateObserver = player?.observe(\.rate, options: [.new]) { [weak self] player, _ in
             guard let self = self, let state = self.state else { return }
 
-            DispatchQueue.main.async {
+            // Schedule in default mode only to avoid dismissing menus
+            CFRunLoopPerformBlock(CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue as CFTypeRef) {
                 if player.rate > 0 {
                     // Playing
                     if state.playbackState != .playing {
@@ -91,23 +93,39 @@ class MediaPlayerService {
                     playbackRate: player.rate
                 )
             }
+            CFRunLoopWakeUp(CFRunLoopGetMain())
         }
 
         // Add periodic time observer to update current time and check for end fade
-        let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
+        let interval = CMTime(seconds: 1.0, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        timeUpdateCounter = 0
+        let queue = DispatchQueue(label: "com.sleepplayer.timeobserver")
+        timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: queue) { [weak self] time in
             guard let self = self, let state = self.state else { return }
 
             let currentTime = time.seconds
-            state.currentTime = currentTime
 
-            // Update Now Playing Info with current time
-            state.mediaKeyHandler?.updateNowPlayingInfo(
-                title: state.currentFileName,
-                duration: state.duration,
-                currentTime: currentTime,
-                playbackRate: self.player?.rate ?? 0.0
-            )
+            // Update UI every second, using default mode only to avoid dismissing menus
+            // Timeline updates will pause while menus are open, which is standard macOS behavior
+            CFRunLoopPerformBlock(CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue as CFTypeRef) {
+                state.currentTime = currentTime
+            }
+            CFRunLoopWakeUp(CFRunLoopGetMain())
+
+            // Update Now Playing Info every 5 seconds to reduce overhead
+            self.timeUpdateCounter += 1
+            if self.timeUpdateCounter >= 5 {
+                self.timeUpdateCounter = 0
+                CFRunLoopPerformBlock(CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue as CFTypeRef) {
+                    state.mediaKeyHandler?.updateNowPlayingInfo(
+                        title: state.currentFileName,
+                        duration: state.duration,
+                        currentTime: currentTime,
+                        playbackRate: self.player?.rate ?? 0.0
+                    )
+                }
+                CFRunLoopWakeUp(CFRunLoopGetMain())
+            }
 
             // Check if we should start fade-out near end of file
             if let sleepTimerState = state.sleepTimerState {
@@ -128,13 +146,17 @@ class MediaPlayerService {
                 // Only do this if duration is valid and we're actually playing
                 // PRIORITY: End-of-file fade takes priority over sleep timer
                 if !self.hasTriggeredEndFade && duration > 0 && timeRemaining > 0 && timeRemaining <= fadeStartThreshold {
-                    // Cancel any sleep timer fade in progress to prioritize end-of-file
-                    if sleepTimerState.isFading {
-                        sleepTimerState.sleepTimerService?.cancel()
-                    }
-
                     self.hasTriggeredEndFade = true
-                    sleepTimerState.sleepTimerService?.triggerEndOfFileFade()
+
+                    // Trigger fade - schedule in default mode only
+                    CFRunLoopPerformBlock(CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue as CFTypeRef) {
+                        // Cancel any sleep timer fade in progress to prioritize end-of-file
+                        if sleepTimerState.isFading {
+                            sleepTimerState.sleepTimerService?.cancel()
+                        }
+                        sleepTimerState.sleepTimerService?.triggerEndOfFileFade()
+                    }
+                    CFRunLoopWakeUp(CFRunLoopGetMain())
                 }
             }
         }

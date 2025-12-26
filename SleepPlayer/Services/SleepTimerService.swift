@@ -24,21 +24,18 @@ class SleepTimerService {
         let newTimer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self, let state = self.state else { return }
 
-            // Update state asynchronously to avoid interfering with menu tracking
-            DispatchQueue.main.async {
-                if !state.isPaused && state.remainingTime > 0 {
-                    state.remainingTime -= 1
+            if !state.isPaused && state.remainingTime > 0 {
+                state.remainingTime -= 1
 
-                    // Start fade when remaining time reaches fade duration
-                    if !state.isFading && state.remainingTime <= state.fadeDuration {
-                        self.startFadeOut()
-                    }
-                } else if !state.isPaused && state.remainingTime <= 0 {
-                    self.timerExpired()
+                // Start fade when remaining time reaches fade duration
+                if !state.isFading && state.remainingTime <= state.fadeDuration {
+                    self.startFadeOut()
                 }
+            } else if !state.isPaused && state.remainingTime <= 0 {
+                self.timerExpired()
             }
         }
-        RunLoop.main.add(newTimer, forMode: .common)
+        RunLoop.main.add(newTimer, forMode: .default)
         timer = newTimer
     }
 
@@ -148,7 +145,7 @@ class SleepTimerService {
                 mediaPlayerState.setVolume(newVolume)
             }
         }
-        RunLoop.main.add(newFadeTimer, forMode: .common)
+        RunLoop.main.add(newFadeTimer, forMode: .default)
         fadeTimer = newFadeTimer
     }
 

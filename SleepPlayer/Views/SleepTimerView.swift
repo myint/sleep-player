@@ -7,8 +7,6 @@ struct SleepTimerView: View {
     @State private var durationMinutes: Int = 30
     @State private var fadeSeconds: Int = 120
     @State private var chopEndSeconds: Int = 120
-    @State private var displayTime: String = "--:--"
-    @State private var updateTimer: Timer?
 
     var body: some View {
         VStack(spacing: 15) {
@@ -16,15 +14,9 @@ struct SleepTimerView: View {
                 .font(.headline)
 
             // Timer display
-            Text(displayTime)
+            Text(sleepTimerState.isActive || sleepTimerState.isPaused ? sleepTimerState.remainingTimeFormatted : "--:--")
                 .font(.system(size: 48, weight: .bold, design: .monospaced))
                 .foregroundColor(sleepTimerState.isPaused ? .secondary : .primary)
-                .onAppear {
-                    startDisplayUpdate()
-                }
-                .onDisappear {
-                    updateTimer?.invalidate()
-                }
 
             // Duration spinner and reset button
             HStack(spacing: 10) {
@@ -125,31 +117,6 @@ struct SleepTimerView: View {
             durationMinutes = Int(sleepTimerState.timerDuration / 60)
             fadeSeconds = Int(sleepTimerState.fadeDuration)
             chopEndSeconds = Int(sleepTimerState.chopEndDuration)
-        }
-    }
-
-    private func startDisplayUpdate() {
-        // Always invalidate existing timer before creating new one
-        updateTimer?.invalidate()
-        updateTimer = nil
-
-        updateDisplayTime()
-
-        let timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak sleepTimerState] _ in
-            // Capture state weakly to prevent retention cycles
-            guard sleepTimerState != nil else { return }
-            updateDisplayTime()
-        }
-
-        // Store timer reference
-        updateTimer = timer
-    }
-
-    private func updateDisplayTime() {
-        if sleepTimerState.isActive || sleepTimerState.isPaused {
-            displayTime = sleepTimerState.remainingTimeFormatted
-        } else {
-            displayTime = "--:--"
         }
     }
 }
