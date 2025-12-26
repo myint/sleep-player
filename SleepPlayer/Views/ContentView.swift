@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct ContentView: View {
     @EnvironmentObject var mediaPlayerState: MediaPlayerState
@@ -64,6 +65,14 @@ struct ContentView: View {
         }, message: {
             Text(mediaPlayerState.errorMessage ?? "Unknown error occurred")
         })
+        .onDisappear {
+            // When window closes, stop playback and quit (QuickTime Player behavior)
+            mediaPlayerState.stop()
+            sleepTimerState.cancelTimer()
+
+            // Quit the app
+            NSApplication.shared.terminate(nil)
+        }
     }
 }
 
