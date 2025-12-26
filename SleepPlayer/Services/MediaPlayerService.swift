@@ -44,6 +44,7 @@ class MediaPlayerService {
             case .readyToPlay:
                 state.duration = item.duration.seconds
                 state.errorMessage = nil
+                // Now Playing Info will be set by play() method
             case .failed:
                 let errorMsg = item.error?.localizedDescription ?? "Failed to load media file"
                 state.errorMessage = errorMsg
@@ -81,6 +82,14 @@ class MediaPlayerService {
                         state.sleepTimerState?.pauseTimer()
                     }
                 }
+
+                // Update Now Playing Info with current playback rate
+                state.mediaKeyHandler?.updateNowPlayingInfo(
+                    title: state.currentFileName,
+                    duration: state.duration,
+                    currentTime: state.currentTime,
+                    playbackRate: player.rate
+                )
             }
         }
 
@@ -91,6 +100,14 @@ class MediaPlayerService {
 
             let currentTime = time.seconds
             state.currentTime = currentTime
+
+            // Update Now Playing Info with current time
+            state.mediaKeyHandler?.updateNowPlayingInfo(
+                title: state.currentFileName,
+                duration: state.duration,
+                currentTime: currentTime,
+                playbackRate: self.player?.rate ?? 0.0
+            )
 
             // Check if we should start fade-out near end of file
             if let sleepTimerState = state.sleepTimerState {

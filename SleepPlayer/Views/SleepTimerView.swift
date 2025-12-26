@@ -31,7 +31,30 @@ struct SleepTimerView: View {
                 Text("Duration (minutes):")
                     .font(.subheadline)
 
-                Stepper(value: $durationMinutes, in: 1...120, step: 5) {
+                Stepper(value: Binding(
+                    get: { durationMinutes },
+                    set: { newValue in
+                        let isIncrement = newValue > durationMinutes
+
+                        if isIncrement {
+                            // Going up
+                            if durationMinutes == 1 {
+                                durationMinutes = 5
+                            } else {
+                                // Round up to next multiple of 5
+                                durationMinutes = min(120, ((durationMinutes / 5) + 1) * 5)
+                            }
+                        } else {
+                            // Going down
+                            if durationMinutes <= 5 {
+                                durationMinutes = 1
+                            } else {
+                                // Round down to previous multiple of 5
+                                durationMinutes = max(5, ((durationMinutes - 1) / 5) * 5)
+                            }
+                        }
+                    }
+                ), in: 1...120) {
                     Text("\(durationMinutes)")
                         .font(.body)
                         .frame(width: 50)

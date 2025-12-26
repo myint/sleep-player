@@ -15,48 +15,69 @@ class MediaKeyHandler: ObservableObject {
     }
 
     private func setupRemoteCommandCenter() {
-        let commandCenter = MPRemoteCommandCenter.shared()
+        // Ensure command center setup happens on main thread
+        DispatchQueue.main.async {
+            let commandCenter = MPRemoteCommandCenter.shared()
 
-        // Play command
-        commandCenter.playCommand.isEnabled = true
-        let playTarget = commandCenter.playCommand.addTarget { [weak self] event in
-            self?.mediaPlayerState?.play()
-            return .success
-        }
-        commandTargets.append(playTarget)
-
-        // Pause command
-        commandCenter.pauseCommand.isEnabled = true
-        let pauseTarget = commandCenter.pauseCommand.addTarget { [weak self] event in
-            self?.mediaPlayerState?.pause()
-            return .success
-        }
-        commandTargets.append(pauseTarget)
-
-        // Toggle play/pause command
-        commandCenter.togglePlayPauseCommand.isEnabled = true
-        let toggleTarget = commandCenter.togglePlayPauseCommand.addTarget { [weak self] event in
-            guard let self = self, let state = self.mediaPlayerState else {
-                return .commandFailed
+            // Play command
+            commandCenter.playCommand.isEnabled = true
+            let playTarget = commandCenter.playCommand.addTarget { [weak self] event in
+                DispatchQueue.main.async {
+                    self?.mediaPlayerState?.play()
+                }
+                return .success
             }
+            self.commandTargets.append(playTarget)
 
-            if state.playbackState == .playing {
-                state.pause()
-            } else {
-                state.play()
+            // Pause command
+            commandCenter.pauseCommand.isEnabled = true
+            let pauseTarget = commandCenter.pauseCommand.addTarget { [weak self] event in
+                DispatchQueue.main.async {
+                    self?.mediaPlayerState?.pause()
+                }
+                return .success
             }
-            return .success
+            self.commandTargets.append(pauseTarget)
+
+            // Toggle play/pause command
+            commandCenter.togglePlayPauseCommand.isEnabled = true
+            let toggleTarget = commandCenter.togglePlayPauseCommand.addTarget { [weak self] event in
+                guard let self = self, let state = self.mediaPlayerState else {
+                    return .commandFailed
+                }
+
+                DispatchQueue.main.async {
+                    if state.playbackState == .playing {
+                        state.pause()
+                    } else {
+                        state.play()
+                    }
+                }
+                return .success
+            }
+            self.commandTargets.append(toggleTarget)
         }
-        commandTargets.append(toggleTarget)
     }
 
-    func updateNowPlayingInfo(title: String, duration: TimeInterval, currentTime: TimeInterval) {
-        var nowPlayingInfo = [String: Any]()
-        nowPlayingInfo[MPMediaItemPropertyTitle] = title
-        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
-        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
+    func updateNowPlayingInfo(title: String, duration: TimeInterval, currentTime: TimeInterval, playbackRate: Float = 1.0) {
+        // Ensure Now Playing updates happen on main thread
+        DispatchQueue.main.async {
+            var nowPlayingInfo = [String: Any]()
+            nowPlayingInfo[MPMediaItemPropertyTitle] = title
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
+            nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
+            nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = playbackRate
 
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+            let nowPlayingCenter = MPNowPlayingInfoCenter.default()
+            nowPlayingCenter.nowPlayingInfo = nowPlayingInfo
+
+            // Set playback state to claim media control priority on macOS
+            if playbackRate > 0 {
+                nowPlayingCenter.playbackState = .playing
+            } else {
+                nowPlayingCenter.playbackState = .paused
+            }
+        }
     }
 
     deinit {

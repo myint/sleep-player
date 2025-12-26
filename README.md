@@ -158,9 +158,9 @@ Potential features for future development:
 ## Troubleshooting
 
 ### AirPod buttons not working
-- Ensure the app is the active audio source
-- Try playing media first, then test AirPod buttons
-- Check that media key handlers are properly initialized
+- The app automatically claims media control when you load and play a file
+- If AirPod buttons control another app instead, pause or quit that app first
+- macOS prioritizes the most recently active media player
 
 ### Video not displaying
 - Ensure the file is a valid video format

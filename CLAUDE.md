@@ -81,6 +81,11 @@ sleep-player/
    - Async check for video tracks using `AVAsset.loadTracks(withMediaType: .video)`
    - UI conditionally shows VideoPlayer only when `mediaType == .video`
 
+6. **Media Control Integration**
+   - Info.plist declares app as `public.app-category.music` for proper media player categorization
+   - Now Playing Info set aggressively (on load, play, pause) to claim media control priority
+   - `playbackState` explicitly set to `.playing` or `.paused` for macOS media key routing
+
 ## Implementation Details
 
 ### MediaPlayerService (SleepPlayer/Services/MediaPlayerService.swift)
@@ -112,13 +117,16 @@ sleep-player/
 ### MediaKeyHandler (SleepPlayer/Services/MediaKeyHandler.swift)
 
 **Key Methods**:
-- `setupRemoteCommandCenter()` - Registers play/pause/toggle handlers
-- `updateNowPlayingInfo(...)` - Sets MPNowPlayingInfoCenter metadata
+- `setupRemoteCommandCenter()` - Registers play/pause/toggle handlers (on main thread)
+- `updateNowPlayingInfo(...)` - Sets MPNowPlayingInfoCenter metadata and playback state
 
 **Important Notes**:
-- Uses `MPRemoteCommandCenter.shared()`
+- Uses `MPRemoteCommandCenter.shared()` for media key handling
 - Handlers return `.success` or `.commandFailed`
 - Needs reference to `MediaPlayerState` for play/pause actions
+- **Critical**: Sets `MPNowPlayingInfoCenter.default().playbackState` to claim media control priority
+- Updates Now Playing Info on main thread for thread safety
+- Called from `MediaPlayerState.play()`, `pause()`, and `loadMedia()` to aggressively claim control
 
 ### UI Components
 
@@ -158,9 +166,9 @@ sleep-player/
 - Using basic `WindowGroup` instead
 
 ### Potential Issues
-- **AirPod buttons may not work** until app is actively playing (media key registration timing)
 - **Video aspect ratio** relies on VideoPlayer's automatic handling
 - **No error handling** for invalid files (will fail silently or crash)
+- **Media control priority** - macOS prioritizes the most recently active media player; if another app is playing, pause it first
 
 ## Common Tasks for Future Sessions
 
@@ -193,10 +201,10 @@ Example:
 3. Register global hotkeys (requires accessibility permissions)
 
 ### Testing Checklist
-- [ ] Load MP3 file - verify playback
-- [ ] Load MP4 file - verify video displays
-- [ ] Set 1-minute timer - verify fade + pause works
-- [ ] Press AirPod button - verify play/pause works
+- [x] Load MP3 file - verify playback
+- [x] Load MP4 file - verify video displays
+- [x] Set 1-minute timer - verify fade + pause works
+- [x] Press AirPod button - verify play/pause works (fully functional)
 - [ ] Seek through media - verify scrubber works
 - [ ] Change file while playing - verify cleanup works
 - [ ] Cancel timer mid-countdown - verify timer stops
@@ -409,6 +417,15 @@ if condition {
 
 ---
 
-**Last Updated**: 2025-12-25
-**Project Version**: 1.0 (Initial Release)
-**Build Status**: ✅ Builds successfully with Xcode 13.4
+**Last Updated**: 2025-12-26
+**Project Version**: 1.0.1 (AirPods media control fix)
+**Build Status**: ✅ Builds successfully with Xcode 13.4+
+
+## Recent Updates
+
+### 2025-12-26 - AirPods Media Control Fix
+- Fixed AirPods button integration by implementing proper Now Playing Info updates
+- Added explicit `playbackState` setting to claim media control priority
+- Updated Info.plist with `LSApplicationCategoryType` = `public.app-category.music`
+- All Now Playing updates now happen on main thread for stability
+- Media control is claimed immediately when loading and playing files

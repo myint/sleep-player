@@ -20,6 +20,9 @@ struct SleepPlayerApp: App {
 
                     // Wire up bidirectional reference between media player and sleep timer
                     mediaPlayerState.sleepTimerState = sleepTimerState
+
+                    // Wire up media key handler to media player for Now Playing updates
+                    mediaPlayerState.mediaKeyHandler = mediaKeyHandler
                 }
         }
         .commands {
