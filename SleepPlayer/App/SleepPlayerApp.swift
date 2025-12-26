@@ -23,6 +23,9 @@ struct SleepPlayerApp: App {
 
                     // Wire up media key handler to media player for Now Playing updates
                     mediaPlayerState.mediaKeyHandler = mediaKeyHandler
+
+                    // Wire up file picker callback
+                    mediaPlayerState.onRequestFileOpen = openFilePicker
                 }
         }
         .commands {

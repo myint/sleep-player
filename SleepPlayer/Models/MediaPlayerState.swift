@@ -33,6 +33,9 @@ class MediaPlayerState: ObservableObject {
     // Reference to media key handler for Now Playing updates
     weak var mediaKeyHandler: MediaKeyHandler?
 
+    // Callback to request file picker (set by App)
+    var onRequestFileOpen: (() -> Void)?
+
     init() {
         mediaPlayerService = MediaPlayerService(state: self)
     }

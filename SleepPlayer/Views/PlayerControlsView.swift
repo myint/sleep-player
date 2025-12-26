@@ -33,7 +33,10 @@ struct PlayerControlsView: View {
             HStack(spacing: 20) {
                 // Play/Pause button
                 Button(action: {
-                    if mediaPlayerState.playbackState == .playing {
+                    if mediaPlayerState.currentFileURL == nil {
+                        // No media loaded - trigger file picker
+                        mediaPlayerState.onRequestFileOpen?()
+                    } else if mediaPlayerState.playbackState == .playing {
                         mediaPlayerState.pause()
                     } else {
                         mediaPlayerState.play()
@@ -43,7 +46,6 @@ struct PlayerControlsView: View {
                         .font(.system(size: 44))
                 }
                 .buttonStyle(.plain)
-                .disabled(mediaPlayerState.currentFileURL == nil)
                 .keyboardShortcut(.space, modifiers: [])
 
                 Spacer()
