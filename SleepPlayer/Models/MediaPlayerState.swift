@@ -22,9 +22,9 @@ class MediaPlayerState: ObservableObject {
     @Published var currentTime: TimeInterval = 0
     @Published var duration: TimeInterval = 0
     @Published var volume: Float = 1.0
+    @Published var errorMessage: String?
 
     private var mediaPlayerService: MediaPlayerService?
-    private var timeObserver: Any?
     private var cancellables = Set<AnyCancellable>()
 
     // Reference to sleep timer for auto-start/pause/reset
@@ -35,6 +35,9 @@ class MediaPlayerState: ObservableObject {
     }
 
     func loadMedia(url: URL) {
+        // Clear any previous errors
+        errorMessage = nil
+
         currentFileURL = url
         currentFileName = url.lastPathComponent
         mediaPlayerService?.loadMedia(url: url)
@@ -48,7 +51,8 @@ class MediaPlayerState: ObservableObject {
 
     func play() {
         mediaPlayerService?.play()
-        playbackState = .playing
+        // Don't set playbackState here - let the rate observer update it
+        // This prevents race conditions between manual state updates and AVPlayer state
 
         // Auto-start or resume timer when playing
         if let sleepTimerState = sleepTimerState {
@@ -64,7 +68,8 @@ class MediaPlayerState: ObservableObject {
 
     func pause() {
         mediaPlayerService?.pause()
-        playbackState = .paused
+        // Don't set playbackState here - let the rate observer update it
+        // This prevents race conditions between manual state updates and AVPlayer state
 
         // Pause timer when pausing playback
         sleepTimerState?.pauseTimer()

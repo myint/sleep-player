@@ -38,8 +38,20 @@ class MediaPlayerService {
 
         // Observe player item status
         playerItemObserver = playerItem.observe(\.status, options: [.new]) { [weak self] item, _ in
-            if item.status == .readyToPlay {
-                self?.state?.duration = item.duration.seconds
+            guard let self = self, let state = self.state else { return }
+
+            switch item.status {
+            case .readyToPlay:
+                state.duration = item.duration.seconds
+                state.errorMessage = nil
+            case .failed:
+                let errorMsg = item.error?.localizedDescription ?? "Failed to load media file"
+                state.errorMessage = errorMsg
+                state.playbackState = .stopped
+            case .unknown:
+                break
+            @unknown default:
+                break
             }
         }
 
@@ -126,6 +138,8 @@ class MediaPlayerService {
                     }
                 }
             } catch {
+                // Log error but default to audio (most common case)
+                print("Error detecting media type: \(error.localizedDescription)")
                 await MainActor.run {
                     state?.mediaType = .audio
                 }

@@ -50,6 +50,11 @@ Carthage/Build/
 *.dSYM.zip
 *.dSYM
 
+## Distribution (Makefile builds)
+*.dmg
+*.xcarchive
+build/dmg_temp/
+
 ## Playgrounds
 timeline.xctimeline
 playground.xcworkspace

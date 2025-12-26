@@ -39,17 +39,19 @@ struct SleepPlayerApp: App {
             panel.allowsMultipleSelection = false
             panel.canChooseDirectories = false
             panel.canChooseFiles = true
-            panel.allowedContentTypes = [
-                .audiovisualContent,
-                .audio,
-                .movie,
-                .video,
-                .mpeg4Movie,
-                UTType(filenameExtension: "mp3")!,
-                UTType(filenameExtension: "m4a")!,
-                UTType(filenameExtension: "flac")!,
-                UTType(filenameExtension: "wav")!
-            ]
+
+            // Build list of allowed content types safely
+            var allowedTypes: [UTType] = [.audiovisualContent, .audio, .movie, .video, .mpeg4Movie]
+
+            // Add additional file types if they can be created
+            let extensions = ["mp3", "m4a", "flac", "wav"]
+            for ext in extensions {
+                if let type = UTType(filenameExtension: ext) {
+                    allowedTypes.append(type)
+                }
+            }
+
+            panel.allowedContentTypes = allowedTypes
 
             if panel.runModal() == .OK, let url = panel.url {
                 self.mediaPlayerState.loadMedia(url: url)

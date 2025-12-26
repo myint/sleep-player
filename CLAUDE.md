@@ -41,6 +41,7 @@ sleep-player/
 │   ├── Assets.xcassets/            # App icon (currently default)
 │   ├── Info.plist                  # App metadata
 │   └── SleepPlayer.entitlements    # Sandboxing permissions
+├── Makefile                        # Build automation (build, dmg, install)
 ├── README.md                       # User-facing documentation
 ├── CLAUDE.md                       # This file (AI context)
 └── .gitignore                      # Xcode-specific ignores
@@ -202,7 +203,51 @@ Example:
 
 ## Build & Development
 
-### Building
+### Building with Makefile (Recommended)
+
+A comprehensive Makefile is provided for development and distribution:
+
+```bash
+# Show all available commands
+make help
+
+# Build (Release configuration)
+make build
+
+# Build and run
+make run
+
+# Build debug version
+make debug
+
+# Clean all build artifacts
+make clean
+
+# Create distributable DMG
+make dmg
+
+# Create DMG with custom version
+make dmg VERSION=1.2.0
+
+# Install to /Applications
+make install
+```
+
+**Makefile Configuration**:
+- **Build directory**: `build/DerivedData/`
+- **Output path**: `build/DerivedData/Build/Products/Release/SleepPlayer.app`
+- **DMG output**: `SleepPlayer.dmg` (in project root)
+- **Default configuration**: Release
+- **Default version**: 1.0.0
+
+**DMG Creation**:
+- The `make dmg` target creates a compressed disk image (UDZO format)
+- Includes symbolic link to /Applications for drag-and-drop installation
+- Uses zlib compression level 9 for smallest file size
+- Volume name: "Sleep Timer Media Player"
+
+### Manual Building (without Makefile)
+
 ```bash
 # Command line build
 xcodebuild -project SleepPlayer.xcodeproj -scheme SleepPlayer -configuration Debug build
@@ -214,8 +259,11 @@ open SleepPlayer.xcodeproj
 
 ### Running
 ```bash
-# Run built app
-open ~/Library/Developer/Xcode/DerivedData/SleepPlayer-*/Build/Products/Debug/SleepPlayer.app
+# Run built app (with Makefile)
+make run
+
+# Or manually
+open build/DerivedData/Build/Products/Release/SleepPlayer.app
 ```
 
 ### Common Xcode Issues

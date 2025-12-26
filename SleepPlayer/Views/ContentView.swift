@@ -57,6 +57,13 @@ struct ContentView: View {
             }
             .padding()
         }
+        .alert("Error Loading Media", isPresented: .constant(mediaPlayerState.errorMessage != nil), actions: {
+            Button("OK") {
+                mediaPlayerState.errorMessage = nil
+            }
+        }, message: {
+            Text(mediaPlayerState.errorMessage ?? "Unknown error occurred")
+        })
     }
 }
 

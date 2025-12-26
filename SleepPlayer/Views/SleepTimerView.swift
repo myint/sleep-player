@@ -106,12 +106,20 @@ struct SleepTimerView: View {
     }
 
     private func startDisplayUpdate() {
+        // Always invalidate existing timer before creating new one
         updateTimer?.invalidate()
+        updateTimer = nil
+
         updateDisplayTime()
 
-        updateTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+        let timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak sleepTimerState] _ in
+            // Capture state weakly to prevent retention cycles
+            guard sleepTimerState != nil else { return }
             updateDisplayTime()
         }
+
+        // Store timer reference
+        updateTimer = timer
     }
 
     private func updateDisplayTime() {

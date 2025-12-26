@@ -33,18 +33,51 @@ The Xcode project is already set up and ready to use!
 
 That's it! The app should launch with a clean window ready to load media files.
 
-### Building from Command Line
+### Building from Command Line (Makefile)
 
-You can also build from the command line:
+A comprehensive Makefile is provided for easy building and distribution:
 
 ```bash
-xcodebuild -project SleepPlayer.xcodeproj -scheme SleepPlayer -configuration Debug build
+# Show all available commands
+make help
+
+# Build the app (Release configuration)
+make build
+
+# Build and run the app
+make run
+
+# Create a distributable DMG
+make dmg
+
+# Create DMG with custom version
+make dmg VERSION=1.2.0
+
+# Install to /Applications
+make install
+
+# Clean build artifacts
+make clean
 ```
 
-To run the built app:
+### Available Makefile Targets
+
+- `make build` - Build the application (Release configuration)
+- `make debug` - Build the application (Debug configuration)
+- `make run` - Build and run the application
+- `make dmg` - Create a distributable DMG file with drag-to-install layout
+- `make install` - Install the app to /Applications
+- `make clean` - Clean all build artifacts
+- `make test` - Run unit tests (when available)
+- `make archive` - Create an Xcode archive for distribution
+- `make help` - Show all available commands
+
+### Manual Build (without Makefile)
+
+You can also build directly with xcodebuild:
 
 ```bash
-open ~/Library/Developer/Xcode/DerivedData/SleepPlayer-*/Build/Products/Debug/SleepPlayer.app
+xcodebuild -project SleepPlayer.xcodeproj -scheme SleepPlayer -configuration Release build
 ```
 
 ## Project Structure
