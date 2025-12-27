@@ -65,9 +65,10 @@ struct ContentView: View {
             Text(mediaPlayerState.errorMessage ?? "Unknown error occurred")
         })
         .onDisappear {
-            // When window closes, fully clear media and cancel timer
+            // When window closes, stop playback, clear state, and quit
             mediaPlayerState.clearMedia()
             sleepTimerState.cancelTimer()
+            NSApplication.shared.terminate(nil)
         }
     }
 }

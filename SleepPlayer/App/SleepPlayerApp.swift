@@ -4,55 +4,27 @@ import AppKit
 
 // AppDelegate to handle file opening
 class AppDelegate: NSObject, NSApplicationDelegate {
-    var fileURLToOpen: URL?
     var pendingFileURL: URL?
 
     func application(_ application: NSApplication, open urls: [URL]) {
         // Store the first URL to be processed when the app is ready
         if let url = urls.first {
-            fileURLToOpen = url
-
-            // Activate the app
-            NSApp.activate(ignoringOtherApps: true)
-
-            // Check if we have any visible windows
-            let hasVisibleWindow = NSApp.windows.contains(where: { $0.isVisible })
-
-            if !hasVisibleWindow {
-                // No visible window - store for loading when window appears
-                pendingFileURL = url
-                if let bundleURL = Bundle.main.bundleURL as URL? {
-                    let config = NSWorkspace.OpenConfiguration()
-                    config.activates = true
-                    config.createsNewApplicationInstance = false
-                    NSWorkspace.shared.openApplication(at: bundleURL, configuration: config) { _, error in
-                        if let error = error {
-                            print("Error reopening app: \(error)")
-                        }
-                    }
-                }
-            } else {
-                // Window exists, just post notification to load file
+            // If app is already running with a window, just load the file
+            if NSApp.windows.contains(where: { $0.isVisible }) {
                 NotificationCenter.default.post(name: .requestOpenFile, object: url)
+            } else {
+                // App is launching or no window - store for loading when window appears
+                pendingFileURL = url
             }
         }
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // If a file was queued to open, store it for when window appears
-        if let url = fileURLToOpen {
-            pendingFileURL = url
-        }
-    }
-
-    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        // The pending file will be loaded when ContentView appears
-        return true
+        // Nothing needed here - pendingFileURL will be checked when ContentView appears
     }
 }
 
 extension Notification.Name {
-    static let openMediaFile = Notification.Name("openMediaFile")
     static let requestOpenFile = Notification.Name("requestOpenFile")
 }
 
@@ -96,9 +68,6 @@ struct SleepPlayerApp: App {
                         queue: .main
                     ) { notification in
                         if let url = notification.object as? URL {
-                            // Show window if hidden/closed
-                            NSApp.windows.first?.makeKeyAndOrderFront(nil)
-                            // Load media
                             mediaPlayerState.loadMedia(url: url)
                         }
                     }
@@ -162,30 +131,8 @@ struct SleepPlayerApp: App {
             panel.allowedContentTypes = allowedTypes
 
             if panel.runModal() == .OK, let url = panel.url {
-                // Check if we have any visible windows
-                let hasVisibleWindow = NSApp.windows.contains(where: { $0.isVisible })
-
-                if !hasVisibleWindow {
-                    // No visible window - trigger the same reopen mechanism as file associations
-                    self.appDelegate.pendingFileURL = url
-                    if let bundleURL = Bundle.main.bundleURL as URL? {
-                        let config = NSWorkspace.OpenConfiguration()
-                        config.activates = true
-                        config.createsNewApplicationInstance = false
-                        NSWorkspace.shared.openApplication(at: bundleURL, configuration: config) { _, error in
-                            if let error = error {
-                                print("Error reopening app: \(error)")
-                                // Fallback: just load the media
-                                DispatchQueue.main.async {
-                                    self.mediaPlayerState.loadMedia(url: url)
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    // Window exists, load directly
-                    self.mediaPlayerState.loadMedia(url: url)
-                }
+                // Load the media file directly
+                self.mediaPlayerState.loadMedia(url: url)
             }
         }
     }

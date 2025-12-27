@@ -246,7 +246,7 @@ make install
 - **Output path**: `build/DerivedData/Build/Products/Release/SleepPlayer.app`
 - **DMG output**: `SleepPlayer.dmg` (in project root)
 - **Default configuration**: Release
-- **Default version**: 1.2.0
+- **Default version**: 1.3.0
 
 **DMG Creation**:
 - The `make dmg` target creates a compressed disk image (UDZO format)
@@ -418,7 +418,7 @@ if condition {
 ---
 
 **Last Updated**: 2025-12-27
-**Project Version**: 1.2.0
+**Project Version**: 1.3.0
 **Build Status**: ✅ Builds successfully with Xcode 13.4+
 
 ## Version Management
@@ -431,6 +431,13 @@ if condition {
 5. `CLAUDE.md` - Add new entry in Recent Updates section
 
 ## Recent Updates
+
+### 2025-12-27 - Version 1.3.0
+- Simplified window management: app now quits when window closes
+- Removed complex window recreation logic (62 lines removed, 10 added)
+- Fixed file opening reliability on both macOS 12 and macOS 15
+- Cleaner, more maintainable codebase
+- App behavior now matches QuickTime Player (quits on window close)
 
 ### 2025-12-27 - Version 1.2.0
 - Changed default sleep timer cutoff duration from 120 to 180 seconds

@@ -15,8 +15,8 @@ DMG_NAME = $(APP_NAME).dmg
 DMG_VOLUME_NAME = "Sleep Timer Media Player"
 DMG_TEMP = $(BUILD_DIR)/dmg_temp
 
-# Version (you can override this: make dmg VERSION=1.2.0)
-VERSION ?= 1.2.0
+# Version (you can override this: make dmg VERSION=1.3.0)
+VERSION ?= 1.3.0
 
 .PHONY: all build clean run dmg help install
 
