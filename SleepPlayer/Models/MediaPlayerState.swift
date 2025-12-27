@@ -112,6 +112,23 @@ class MediaPlayerState: ObservableObject {
         currentTime = 0
     }
 
+    func clearMedia() {
+        // Stop playback first
+        stop()
+
+        // Clear all media state
+        currentFileURL = nil
+        currentFileName = ""
+        mediaType = .unknown
+        duration = 0
+        currentTime = 0
+        playbackState = .stopped
+        errorMessage = nil
+
+        // Clean up the player service
+        mediaPlayerService = MediaPlayerService(state: self)
+    }
+
     func seek(to time: TimeInterval) {
         mediaPlayerService?.seek(to: time)
     }

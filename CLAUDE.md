@@ -246,7 +246,7 @@ make install
 - **Output path**: `build/DerivedData/Build/Products/Release/SleepPlayer.app`
 - **DMG output**: `SleepPlayer.dmg` (in project root)
 - **Default configuration**: Release
-- **Default version**: 1.1.0
+- **Default version**: 1.2.0
 
 **DMG Creation**:
 - The `make dmg` target creates a compressed disk image (UDZO format)
@@ -417,11 +417,36 @@ if condition {
 
 ---
 
-**Last Updated**: 2025-12-26
-**Project Version**: 1.1.0
+**Last Updated**: 2025-12-27
+**Project Version**: 1.2.0
 **Build Status**: ✅ Builds successfully with Xcode 13.4+
 
+## Version Management
+
+**IMPORTANT**: When bumping versions, update ALL of the following locations:
+1. `SleepPlayer/Info.plist` - `CFBundleShortVersionString` and `CFBundleVersion`
+2. `Makefile` - `VERSION ?= x.x.x` (line 19)
+3. `CLAUDE.md` - "Default version" in Makefile Configuration section (line 249)
+4. `CLAUDE.md` - "Project Version" in header section (line 421)
+5. `CLAUDE.md` - Add new entry in Recent Updates section
+
 ## Recent Updates
+
+### 2025-12-27 - Version 1.2.0
+- Changed default sleep timer cutoff duration from 120 to 180 seconds
+- Added support for opening files via double-click and file associations
+- Implemented single window instance enforcement
+- Removed quit-on-close behavior (window closes but app stays running)
+- Added proper window recreation when opening files after window closure
+- Updated app icon with increased whitespace to match macOS design
+- Changed default sleep timer duration from 30 to 20 minutes
+- Made window height dynamic based on content
+- Removed seek forward/backward buttons (kept keyboard shortcuts)
+- Added View menu items for seek controls with arrow key shortcuts
+- Added Help menu item linking to GitHub repository
+- Improved file loading reliability after window recreation
+- Hide "Sleep Timer Media Player" title text when media is loaded
+- Fixed state clearing when window closes
 
 ### 2025-12-26 - Version 1.1.0
 - Quit app when window closes (QuickTime Player behavior)

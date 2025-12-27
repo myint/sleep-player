@@ -15,9 +15,9 @@
     <key>CFBundlePackageType</key>
     <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.1</string>
+    <string>1.2</string>
     <key>CFBundleVersion</key>
-    <string>2</string>
+    <string>3</string>
     <key>LSMinimumSystemVersion</key>
     <string>$(MACOSX_DEPLOYMENT_TARGET)</string>
     <key>NSHumanReadableCopyright</key>
@@ -26,5 +26,36 @@
     <string>NSApplication</string>
     <key>LSApplicationCategoryType</key>
     <string>public.app-category.music</string>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeExtensions</key>
+            <array>
+                <string>mp3</string>
+                <string>m4a</string>
+                <string>mp4</string>
+                <string>m4v</string>
+                <string>mov</string>
+                <string>wav</string>
+                <string>aiff</string>
+                <string>aif</string>
+                <string>flac</string>
+                <string>aac</string>
+            </array>
+            <key>CFBundleTypeName</key>
+            <string>Audio/Video File</string>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSHandlerRank</key>
+            <string>Alternate</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>public.audio</string>
+                <string>public.movie</string>
+                <string>public.video</string>
+                <string>public.audiovisual-content</string>
+            </array>
+        </dict>
+    </array>
 </dict>
 </plist>

@@ -4,9 +4,9 @@ struct SleepTimerView: View {
     @EnvironmentObject var sleepTimerState: SleepTimerState
     @EnvironmentObject var mediaPlayerState: MediaPlayerState
 
-    @State private var durationMinutes: Int = 30
+    @State private var durationMinutes: Int = 20
     @State private var fadeSeconds: Int = 120
-    @State private var chopEndSeconds: Int = 120
+    @State private var chopEndSeconds: Int = 180
 
     var body: some View {
         VStack(spacing: 15) {

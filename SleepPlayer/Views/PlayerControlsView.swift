@@ -2,7 +2,6 @@ import SwiftUI
 
 struct PlayerControlsView: View {
     @EnvironmentObject var mediaPlayerState: MediaPlayerState
-    private let seekInterval: TimeInterval = 5.0  // Seek 5 seconds with arrow keys
 
     var body: some View {
         VStack(spacing: 15) {
@@ -64,23 +63,6 @@ struct PlayerControlsView: View {
                     )
                     .frame(width: 100)
                 }
-
-                // Add invisible seek buttons for keyboard shortcuts
-                Button("") {
-                    let newTime = max(0, mediaPlayerState.currentTime - seekInterval)
-                    mediaPlayerState.seek(to: newTime)
-                }
-                .keyboardShortcut(.leftArrow, modifiers: [])
-                .frame(width: 0, height: 0)
-                .disabled(mediaPlayerState.currentFileURL == nil)
-
-                Button("") {
-                    let newTime = min(mediaPlayerState.duration, mediaPlayerState.currentTime + seekInterval)
-                    mediaPlayerState.seek(to: newTime)
-                }
-                .keyboardShortcut(.rightArrow, modifiers: [])
-                .frame(width: 0, height: 0)
-                .disabled(mediaPlayerState.currentFileURL == nil)
             }
             .padding(.vertical, 5)
         }
