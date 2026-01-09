@@ -246,7 +246,7 @@ make install
 - **Output path**: `build/DerivedData/Build/Products/Release/SleepPlayer.app`
 - **DMG output**: `SleepPlayer.dmg` (in project root)
 - **Default configuration**: Release
-- **Default version**: 1.3.0
+- **Default version**: 1.4.0
 
 **DMG Creation**:
 - The `make dmg` target creates a compressed disk image (UDZO format)
@@ -417,8 +417,8 @@ if condition {
 
 ---
 
-**Last Updated**: 2025-12-27
-**Project Version**: 1.3.0
+**Last Updated**: 2026-01-09
+**Project Version**: 1.4.0
 **Build Status**: ✅ Builds successfully with Xcode 13.4+
 
 ## Version Management
@@ -431,6 +431,13 @@ if condition {
 5. `CLAUDE.md` - Add new entry in Recent Updates section
 
 ## Recent Updates
+
+### 2026-01-09 - Version 1.4.0
+- Simplified volume management: always reset to 100%
+- Removed volume tracking logic (volumeBeforeFade)
+- Pause/unpause now resets timer and volume for predictable behavior
+- Audio always resets to 100% after fade-out completes
+- More consistent and simpler user experience
 
 ### 2025-12-27 - Version 1.3.0
 - Simplified window management: app now quits when window closes
