@@ -65,6 +65,9 @@ class MediaPlayerState: ObservableObject {
     }
 
     func play() {
+        // Reset volume to 100% when playing/resuming
+        setVolume(1.0)
+
         mediaPlayerService?.play()
         // Don't set playbackState here - let the rate observer update it
         // This prevents race conditions between manual state updates and AVPlayer state
@@ -77,16 +80,9 @@ class MediaPlayerState: ObservableObject {
             playbackRate: 1.0  // Set to 1.0 to indicate playing
         )
 
-        // Auto-start or resume timer when playing
-        if let sleepTimerState = sleepTimerState {
-            if !sleepTimerState.isActive {
-                // Start timer with current duration
-                sleepTimerState.startTimer()
-            } else if sleepTimerState.isPaused {
-                // Resume timer if it was paused
-                sleepTimerState.resumeTimer()
-            }
-        }
+        // Reset and start timer when playing/resuming
+        sleepTimerState?.resetTimer()
+        sleepTimerState?.startTimer()
     }
 
     func pause() {
@@ -102,8 +98,9 @@ class MediaPlayerState: ObservableObject {
             playbackRate: 0.0  // Set to 0.0 to indicate paused
         )
 
-        // Pause timer when pausing playback
-        sleepTimerState?.pauseTimer()
+        // Reset timer and volume to 100% when pausing
+        sleepTimerState?.resetTimer()
+        setVolume(1.0)
     }
 
     func stop() {

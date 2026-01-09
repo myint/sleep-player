@@ -6,7 +6,6 @@ class SleepTimerService {
     private var timer: Timer?
     private var fadeTimer: Timer?
     private var mediaPlayerState: MediaPlayerState?
-    private var volumeBeforeFade: Float = 1.0
 
     init(state: SleepTimerState) {
         self.state = state
@@ -54,9 +53,9 @@ class SleepTimerService {
         fadeTimer?.invalidate()
         fadeTimer = nil
 
-        // Restore volume to what it was before fade started (only if we were fading)
-        if state?.isFading == true, let mediaPlayerState = mediaPlayerState {
-            mediaPlayerState.setVolume(volumeBeforeFade)
+        // Always reset volume to 100% when canceling
+        if let mediaPlayerState = mediaPlayerState {
+            mediaPlayerState.setVolume(1.0)
         }
 
         state?.isFading = false
@@ -94,9 +93,8 @@ class SleepTimerService {
         // Guard against zero fade steps (shouldn't happen with min duration, but be safe)
         guard fadeSteps > 0 else { return }
 
-        // Save current volume before fading
+        // Get current volume for fading
         let initialVolume = mediaPlayerState.volume
-        volumeBeforeFade = initialVolume
 
         // Mark that we're fading - only do this AFTER the guards pass
         state.isFading = true
@@ -135,9 +133,9 @@ class SleepTimerService {
                     state.isActive = false
                 }
 
-                // Reset volume to pre-fade level for next playback
+                // Always reset volume to 100% for next playback
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    mediaPlayerState.setVolume(self.volumeBeforeFade)
+                    mediaPlayerState.setVolume(1.0)
                 }
             } else {
                 // Reduce volume gradually
